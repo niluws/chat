@@ -1,0 +1,147 @@
+{% load static %}
+
+    <!-- Chat -->
+        <div class="card-header">
+            <h2>Selena Wagner</h2>
+
+            <div class="dropdown">
+                <div class="dropdown">
+                    <a class="dropdown-toggle icon-burger-mini" href="#" role="button"
+                       id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                       aria-expanded="false">
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item" href="user-profile-settings.html">Profile</a>
+                        <a class="dropdown-item" href="javascript:void(0)">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Media Chat Right -->
+        <div class="card-body pb-0" id="chat-log" data-simplebar style="height: 545px;overflow-y: scroll;">
+
+        </div>
+
+
+        <div class="chat-footer">
+            <div class="input-group input-group-chat" style="">
+                <div class="input-group-prepend">
+                    <a href="#" class="emoticon-icon mdi mdi-emoticon-happy-outline"></a>
+                </div>
+
+                <input type="text" id="chat-message-input" class="form-control"
+                       aria-label="Text input with dropdown button">
+
+
+                <input id="chat-message-submit" type="button" value="Enter"
+                       style="width: 80px;border:none;background-color: rgba(158,109,224,0.82);color: whitesmoke">
+            </div>
+        </div>
+
+
+{{ room_name|json_script:"room-name" }}
+<script src="{% static 'reconnecting-websocket.js' %}"></script>
+<script>
+
+    var username =
+    {{ username }}
+    var userid={{ userid }}
+
+
+
+    const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+    const chatSocket = new ReconnectingWebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/chat/'
+        + roomName
+        + '/'
+    );
+
+    chatSocket.onopen = function (e) {
+        chatSocket.send(JSON.stringify({'command': 'fetch_message', 'roomname': roomName}));
+    }
+
+
+   chatSocket.onmessage = function (e) {
+
+
+        const data = JSON.parse(e.data);
+        const currentUserId =userid
+
+        if (data.command === 'fetch_message') {
+            {#console.log(data.author);#}
+            // Handle fetched messages
+            const messages = data.message;
+            const chatLog = document.querySelector('#chat-log');
+            chatLog.innerHTML = ''; // Clear the chat log
+
+            messages.forEach(function (msg) {
+                {#console.log(msg)#}
+                const timestamp = new Date(msg.timestamp).toLocaleString();
+
+                const content = ` <div class="media media-chat  ${msg.author === currentUserId ? 'media-chat-right' : ''}"  >
+                ${msg.author !== currentUserId ? '<img src="/static/images/user/user-sm-01.jpg" class="rounded-circle" alt="Avata Image">' : ''}
+                <div class="media-body" >
+                    <div class="text-content" >
+                        <div class="message" >${msg.content}</div>
+                        <time class="time">${timestamp}</time>
+                    </div>
+                </div>
+            </div>`;
+                chatLog.innerHTML += (content + '<br>');
+            });
+
+        } else if (data.command === 'new_message') {
+            // Handle new messages
+            const now = new Date();
+
+
+            const message = ` <div class="media media-chat ${data.author === currentUserId ? 'media-chat-right' : ''}"  >
+                ${data.author !== currentUserId ? '<img src="/static/images/user/user-sm-01.jpg" class="rounded-circle" alt="Avata Image">' : ''}
+                <div class="media-body" >
+                    <div class="text-content" >
+                        <div class="message" >${data.content}</div>
+                        <time class="time">${ now.toLocaleString()}</time>
+                    </div>
+                </div>
+            </div>`;
+
+            document.querySelector('#chat-log').innerHTML += (message + '<br>');
+
+        }
+
+    };
+
+
+
+    chatSocket.onclose = function (e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function (e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
+
+    document.querySelector('#chat-message-submit').onclick = function (e) {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'command': "new_message",
+            'username': username,
+            'roomname': roomName,
+
+        }));
+
+        messageInputDom.value = '';
+    };
+</script>
+</body>
+</html>

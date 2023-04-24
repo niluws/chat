@@ -1,0 +1,59 @@
+{% extends 'index.html' %}
+{% block content %}
+    <div class="content-wrapper">
+        <div class="content">
+            <div class="row no-gutters">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="room-name-input" placeholder="make a new chat"
+                           aria-label="Recipient's username"
+                           aria-describedby="basic-addon2">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-primary" id="room-name-submit" type="button">create</button>
+                    </div>
+                </div>
+                <div id="chat-list" class="col-lg-5 col-xxl-4">
+                    {% include 'chat/chat_list.html' %}
+                </div>
+
+                <div class="col-lg-7 col-xxl-8">
+                    <div id="content" class="card card-default chat-right-sidebar">
+
+                        {% include 'chat/room.html' %}
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+   <script>
+    document.querySelector('#room-name-input').focus();
+    document.querySelector('#room-name-input').onkeyup = function (e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#room-name-submit').click();
+        }
+    };
+
+    document.querySelector('#room-name-submit').onclick = function (e) {
+        var roomName = document.querySelector('#room-name-input').value;
+        $.get('/chat/' + roomName, {}).then(value => {
+            $('#content').html(value);
+            $.get('/chat/chat_list/', {}).then(value => {
+                $('#chat-list').html(value);
+            });
+        });
+
+    };
+
+    function Refresh(newRoomName) {
+        console.log(newRoomName)
+        $.get('/chat/chat_list/', {}).then(value => {
+            $('#chat-list').html(value);
+        });
+
+
+    }
+</script>
+
+{% endblock %}
