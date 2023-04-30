@@ -8,11 +8,11 @@
         </div>
     </form>
 
-    <ul class="card-body px-0 " data-simplebar style="max-height: 630px;">
+    <ul class="card-body px-0 contacts" data-simplebar style="max-height: 630px;">
         {% for chat_room in chat_rooms %}
 
-            <li class="mb-4 px-5 py-2 {% if request.resolver_match.url_name == chat_room.roomname %} bg-primary {% endif %}">
-                <a onclick="Refresh('{{ chat_room.roomname }}')" class="media media-message">
+            <li class="mb-4 px-5 py-2 contact-li {% if forloop.first %} bg-primary {% endif %}" chat-id="chat_{{ chat_room.id }}">
+                <a class="media media-message">
                     <div class="position-relative mr-3">
                         <img class="rounded-circle" src="/static/images/user/user-sm-01.jpg"
                              alt="User Image">
@@ -38,6 +38,7 @@
             </li>
 
         {% endfor %}
+
 
     </ul>
 </div>
