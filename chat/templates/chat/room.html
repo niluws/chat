@@ -1,7 +1,16 @@
 {% load static %}
-
-    <!-- Chat -->
-        <div class="card-header">
+<style>
+    .hide {
+        display: none;
+    }
+    .is_active{
+        display: block;
+    }
+</style>
+{% for chat_room in chat_rooms %}
+    <div class="card card-default chat-right-sidebar messages-wrapper  {% if forloop.first %}hide is_active{% else %}hide{% endif %}" chat-id="chat_{{ chat_room.id }}">
+        <!-- Chat -->
+        <div class="card-header  ">
             <h2>Selena Wagner</h2>
 
             <div class="dropdown">
@@ -38,6 +47,12 @@
                        style="width: 80px;border:none;background-color: rgba(158,109,224,0.82);color: whitesmoke">
             </div>
         </div>
+    </div>
+{% endfor %}
+
+
+
+
 
 
 {{ room_name|json_script:"room-name" }}
@@ -46,8 +61,8 @@
 
     var username =
     {{ username }}
-    var userid={{ userid }}
-
+    var userid =
+    {{ userid }}
 
 
     const roomName = JSON.parse(document.getElementById('room-name').textContent);
@@ -65,21 +80,19 @@
     }
 
 
-   chatSocket.onmessage = function (e) {
+    chatSocket.onmessage = function (e) {
 
 
         const data = JSON.parse(e.data);
-        const currentUserId =userid
+        const currentUserId = userid
 
         if (data.command === 'fetch_message') {
-            {#console.log(data.author);#}
             // Handle fetched messages
             const messages = data.message;
             const chatLog = document.querySelector('#chat-log');
             chatLog.innerHTML = ''; // Clear the chat log
 
             messages.forEach(function (msg) {
-                {#console.log(msg)#}
                 const timestamp = new Date(msg.timestamp).toLocaleString();
 
                 const content = ` <div class="media media-chat  ${msg.author === currentUserId ? 'media-chat-right' : ''}"  >
@@ -104,7 +117,7 @@
                 <div class="media-body" >
                     <div class="text-content" >
                         <div class="message" >${data.content}</div>
-                        <time class="time">${ now.toLocaleString()}</time>
+                        <time class="time">${now.toLocaleString()}</time>
                     </div>
                 </div>
             </div>`;
@@ -114,7 +127,6 @@
         }
 
     };
-
 
 
     chatSocket.onclose = function (e) {
@@ -143,5 +155,3 @@
         messageInputDom.value = '';
     };
 </script>
-</body>
-</html>

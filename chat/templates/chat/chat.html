@@ -16,10 +16,8 @@
                 </div>
 
                 <div class="col-lg-7 col-xxl-8">
-                    <div id="content" class="card card-default chat-right-sidebar">
+                    {% include 'chat/room.html' %}
 
-                        {% include 'chat/room.html' %}
-                    </div>
 
                 </div>
 
@@ -46,14 +44,19 @@
 
     };
 
-    function Refresh(newRoomName) {
-        console.log(newRoomName)
-        $.get('/chat/chat_list/', {}).then(value => {
-            $('#chat-list').html(value);
-        });
 
+    $('.contact-li').on('click', function () {
+            console.log('hi')
+            $('.contacts .bg-primary').removeClass('bg-primary')
+            $(this).addClass('bg-primary')
 
-    }
+            // message wrappers
+            let chat_id = $(this).attr('chat-id')
+            $('.messages-wrapper.is_active').removeClass('is_active')
+            $('.messages-wrapper[chat-id="' + chat_id + '"]').addClass('is_active')
+
+        })
+
 </script>
 
 {% endblock %}
